@@ -14,7 +14,7 @@ const newOtp = async (req, res) => {
     lowerCaseAlphabets: false,
     specialChars: false,
   });
-
+ 
   const now = new Date();
   const expiration_time = addMinutesToDate(now, 3);
 
