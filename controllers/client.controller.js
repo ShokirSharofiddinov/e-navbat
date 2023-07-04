@@ -1,4 +1,12 @@
 const pool = require("../config/db");
+const DeviceDetector = require("node-device-detector");
+
+const detector = new DeviceDetector({
+  clientIndexes: true,
+  deviceIndexes: true,
+  deviceAliasCode: false,
+});
+
 const addClient = async (req, res) => {
   try {
     const {
@@ -33,10 +41,16 @@ const addClient = async (req, res) => {
 
 const getClient = async (req, res) => {
   try {
+    const userAgent = req.headers["user-agent"]
+    console.log(userAgent)
+    const result = detector.detect(userAgent)
+    console.log("result parse", result)
+    // console.log(DeviceHelper.isDesktop(result))
     const clients = await pool.query(`select * from client`);
     res.status(200).send(clients.rows);
   } catch (error) {
     res.status(500).json("Serverda xatolik");
+    console.log(error)
   }
 };
 

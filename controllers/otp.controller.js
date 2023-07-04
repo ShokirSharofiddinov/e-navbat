@@ -5,7 +5,6 @@ const otpGenerator = require("otp-generator");
 const { addMinutesToDate } = require("../helpers/addMinutesToDate");
 const { dates } = require("../helpers/dates");
 
-
 //     new OTP
 const newOtp = async (req, res) => {
   const { phone_number } = req.body;
@@ -14,7 +13,7 @@ const newOtp = async (req, res) => {
     lowerCaseAlphabets: false,
     specialChars: false,
   });
- 
+
   const now = new Date();
   const expiration_time = addMinutesToDate(now, 3);
 
@@ -85,14 +84,21 @@ async function verifyOtp(req, res) {
     [check]
   );
   if (clientResult.rows.length < 1) {
-    return res
-      .status(200)
-      .send({ status: "Success", Details: "new", Check: check });
+    const newClient = await pool.query(
+      `INSERT INTO client (client_phone_number) VALUES ($1) returning id`,
+      [check]
+    )
+    return res.status(200).send({
+      status: "Success",
+      Details: "new",
+      Check: check,
+      ClientId: clientResult.rows[0].id,
+    });
   } else {
     return res.status(200).send({
       status: "Success",
       Details: "old",
-      ClientName: clientResult.rows[0].client_first_name,
+      ClientId: clientResult.rows[0].id,
     });
   }
 }

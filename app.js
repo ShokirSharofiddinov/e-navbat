@@ -3,6 +3,7 @@ const express = require("express");
 const mainRouter = require("./routes/index.routes");
 
 const PORT = config.get("port") || 3030;
+// const PORT = 3030
 
 const app = express();
 
