@@ -5,6 +5,15 @@ const otpGenerator = require("otp-generator");
 const { addMinutesToDate } = require("../helpers/addMinutesToDate");
 const { dates } = require("../helpers/dates");
 const myJwt = require("../services/JwtService");
+const bcrypt = require("bcrypt");
+const DeviceDetector = require("node-device-detector");
+const config = require("config");
+
+const detector = new DeviceDetector({
+  clientIndexes: true,
+  deviceIndexes: true,
+  deviceAliasCode: false,
+});
 
 //     new OTP
 const newOtp = async (req, res) => {
@@ -91,6 +100,19 @@ const verifyOtp = async (req, res) => {
             id: client_id,
           };
           const tokens = myJwt.generateTokens(payload);
+          const hashedRefreshToken = bcrypt.hashSync(tokens.refreshToken, 7);
+          const userAgent = req.headers["user-agent"];
+          const resUserAgent = detector.detect(userAgent);
+          const { os, client, device } = resUserAgent;
+          await pool.query(
+            `INSERT INTO token(table_name, user_id, user_os, user_device, \
+            user_browser, hashed_refresh_token) values($1,$2,$3,$4,$5,$6) returning id`,
+            ["client", client_id, os, device, client, hashedRefreshToken]
+          );
+          res.cookie("refreshToken", tokens.refreshToken, {
+            mxAge: config.get("refresh_ms"),
+            httpOnly: true,
+          });
           const response = {
             Status: "Success",
             Details: details,
