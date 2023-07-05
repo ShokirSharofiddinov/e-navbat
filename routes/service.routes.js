@@ -1,5 +1,10 @@
 const { Router } = require("express");
-const { addService, getService, updateService, deleteService } = require("../controllers/service.controller");
+const {
+  addService,
+  getService,
+  updateService,
+  deleteService,
+} = require("../controllers/service.controller");
 
 const router = Router();
 
